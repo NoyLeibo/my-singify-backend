@@ -8,18 +8,33 @@ import { dbService } from './services/db.service'
 import { userRoutes } from './api/user/user.routes'
 import { authRoutes } from './api/auth/auth.routes'
 import { taskRoutes } from './api/task/task.routes'
+import expressLogger from 'morgan'
+// import path, { dirname } from 'path'
+// import { fileURLToPath } from 'url'
+// import cookieParser from 'cookie-parser'
+
+// const __filename = fileURLToPath(import.meta.url)
+// const __dirname = dirname(__filename)
 
 dotenv.config()
 
 const app = express()
 app.use(express.json())
+app.use(expressLogger('dev'))
+// app.use(cookieParser())
+app.use(express.static('public'))
 
 const corsOptions = {
-  origin: ['http://127.0.0.1:8081', 'http://localhost:8081'],
+  // Make sure origin contains the url your frontend is running on
+  origin: [
+    'http://127.0.0.1:5173',
+    'http://localhost:5173',
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
+  ],
   credentials: true,
 }
 app.use(cors(corsOptions))
-
 // cookies usages
 // app.use(
 //   session({
@@ -29,8 +44,11 @@ app.use(cors(corsOptions))
 //     cookie: { maxAge: 5 * 60 * 1000 },
 //   }),
 // )
+app.get('/', (req, res) => {
+  res.send('API is working!')
+})
 
-app.use('/test', testRoutes)
+// app.use('/test', testRoutes)
 app.use('/auth', authRoutes)
 app.use('/user', userRoutes)
 app.use('/task', taskRoutes)
@@ -48,3 +66,7 @@ const startServer = async () => {
 }
 
 startServer()
+
+// app.get('/**', (req, res) => {
+//   res.sendFile(path.resolve('public/index.html'))
+// })

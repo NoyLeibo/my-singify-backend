@@ -54,6 +54,7 @@ const signup = async (request: Request, response: Response): Promise<any> => {
 
 const login = async (request: Request, response: Response): Promise<any> => {
   const { email, password } = request.body
+  console.log(request.body)
 
   if (!email || !password)
     return response

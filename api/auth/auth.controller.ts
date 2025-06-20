@@ -6,8 +6,9 @@ import { validationHelper } from '../../utils/validationHelpers'
 
 const signup = async (request: Request, response: Response): Promise<any> => {
   try {
-    const { name, email, password, birthday } = request.body
-    const requiredField = !name || !email || !password
+    const { name, email, password, birthday, gender } = request.body
+
+    const requiredField = !name || !email || !password || !birthday || !gender
     if (requiredField) {
       return response
         .status(StatusCodes.BAD_REQUEST)
@@ -36,14 +37,15 @@ const signup = async (request: Request, response: Response): Promise<any> => {
         .send('Email is already in use')
     }
 
-    const { user, token } = await authService.register({
+    const { user, userToken } = await authService.register({
       name,
       email,
-      password: passwordString,
+      password,
       birthday,
+      gender,
     })
 
-    return response.status(StatusCodes.CREATED).send({ user, token })
+    return response.status(StatusCodes.CREATED).send({ user, userToken })
   } catch (error: any) {
     console.error('❌ Signup error:', error)
     return response
@@ -53,29 +55,32 @@ const signup = async (request: Request, response: Response): Promise<any> => {
 }
 
 const login = async (request: Request, response: Response): Promise<any> => {
-  const { email, password } = request.body
-  console.log(request.body)
+  const { emailOrName, password } = request.body
+  const requiredField = !emailOrName || !password
 
-  if (!email || !password)
+  if (requiredField)
     return response
       .status(StatusCodes.BAD_REQUEST)
       .send('Email or password are missing.')
 
-  const normalizedEmail = email.toLowerCase()
+  if (typeof emailOrName !== 'string' || typeof password !== 'string') {
+    return response
+      .status(StatusCodes.BAD_REQUEST)
+      .send('Invalid email or password format.')
+  }
 
   try {
-    const { loggedInUser, token } = await authService.login(
-      normalizedEmail,
-      password,
-    )
+    // const { loggedInUser, token } =
+    await authService.loginUserWithEmailOrName(emailOrName, password)
+    return response.status(StatusCodes.OK).send('Login successful')
 
-    if (!loggedInUser && !token) {
-      return response
-        .status(StatusCodes.BAD_REQUEST)
-        .send('Invalid email or password')
-    } else {
-      return response.status(StatusCodes.OK).send({ loggedInUser, token })
-    }
+    // if (!loggedInUser && !token) {
+    //   return response
+    //     .status(StatusCodes.BAD_REQUEST)
+    //     .send('Invalid email or password')
+    // } else {
+    // return response.status(StatusCodes.OK).send({ loggedInUser, token })
+    // }
   } catch (err: any) {
     console.error(err.message)
     response.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message)

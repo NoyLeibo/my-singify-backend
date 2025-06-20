@@ -3,6 +3,7 @@ import { IUserModel, UserModel } from '../../models/user.model'
 import { jwtService } from '../../utils/jwt'
 import { userService } from '../user/user.service'
 import nodemailer from 'nodemailer'
+import { genderType } from '../../models/types'
 
 const saltRounds: number = 10
 
@@ -11,37 +12,46 @@ interface registerScheme {
   email: string
   password: string
   birthday: string
+  gender: genderType
 }
 
 const register = async (userData: registerScheme) => {
-  const { name, email, password, birthday } = userData
-  const [monthStr, dayStr, yearStr] = birthday.split('/')
-  const day = Number(dayStr)
-  const month = Number(monthStr)
-  const year = Number(yearStr)
+  try {
+    const { name, email, password, birthday, gender } = userData
 
-  const birthDate = new Date(year, month - 1, day)
+    const hashedPassword = await bcrypt.hash(password, saltRounds)
+    const birthDate = new Date(birthday)
 
-  const hashedPassword = await bcrypt.hash(password, saltRounds)
+    const isEmailExists = await userService.getUserByEmail(email)
+    if (isEmailExists) {
+      throw new Error('Email already exists')
+    }
 
-  const newUser = new UserModel({
-    name,
-    email,
-    password: hashedPassword,
-    birthday: birthDate,
-  })
+    console.log('Type of birthDate:', typeof birthDate)
+    console.log('BirthDate:', birthDate)
 
-  await newUser.save()
+    const newUser = new UserModel({
+      name,
+      email,
+      password: hashedPassword,
+      birthday: birthDate,
+      gender,
+    })
 
-  const token = jwtService.createShortToken(newUser)
-  const user = newUser.removeSensitiveData()
+    await newUser.save()
 
-  return { user, token }
+    const userToken = jwtService.createShortToken(newUser)
+    const user = newUser.removeSensitiveData()
+
+    return { user, userToken }
+  } catch (error: any) {
+    console.error('Error during registration:', error)
+    throw new Error(error.message || 'Registration failed')
+  }
 }
 
-const login = async (email: string, password: string) => {
+const login = async (user: IUserModel, password: string) => {
   try {
-    const user = await userService.getUserByEmail(email)
     const userHashedPassword = user?.password
 
     if (user && userHashedPassword) {
@@ -60,6 +70,22 @@ const login = async (email: string, password: string) => {
   } catch (error: any) {
     console.error('Error during login:', error)
     throw new Error('Invalid email or password')
+  }
+}
+
+const loginUserWithEmailOrName = async (
+  emailOrName: string,
+  password: string,
+) => {
+  const userWithEmail = await userService.getUserByEmail(emailOrName)
+  const userWithName = await userService.getUserByName(emailOrName)
+  if (userWithEmail) {
+    console.log('Logging in with email:', emailOrName)
+    return await login(userWithEmail, password)
+  } else if (userWithName) {
+    return await login(userWithName, password)
+  } else {
+    throw new Error('User not found')
   }
 }
 
@@ -90,6 +116,7 @@ const changePassword = async (email: string, newPassword: string) => {
 
 export const authService = {
   register,
-  login,
+  login: login,
   changePassword,
+  loginUserWithEmailOrName,
 }

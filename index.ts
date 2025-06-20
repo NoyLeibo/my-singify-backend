@@ -9,12 +9,7 @@ import { userRoutes } from './api/user/user.routes'
 import { authRoutes } from './api/auth/auth.routes'
 import { taskRoutes } from './api/task/task.routes'
 import expressLogger from 'morgan'
-// import path, { dirname } from 'path'
-// import { fileURLToPath } from 'url'
 // import cookieParser from 'cookie-parser'
-
-// const __filename = fileURLToPath(import.meta.url)
-// const __dirname = dirname(__filename)
 
 dotenv.config()
 
@@ -32,6 +27,8 @@ const corsOptions = {
     'http://127.0.0.1:3000',
     'http://localhost:3000',
   ],
+  methods: ['GET', 'POST', 'OPTIONS', 'PUT'],
+  allowedHeaders: ['Content-Type'],
   credentials: true,
 }
 app.use(cors(corsOptions))
@@ -44,7 +41,7 @@ app.use(cors(corsOptions))
 //     cookie: { maxAge: 5 * 60 * 1000 },
 //   }),
 // )
-app.get('/', (req, res) => {
+app.post('/', (req, res) => {
   res.send('API is working!')
 })
 
@@ -66,7 +63,3 @@ const startServer = async () => {
 }
 
 startServer()
-
-// app.get('/**', (req, res) => {
-//   res.sendFile(path.resolve('public/index.html'))
-// })

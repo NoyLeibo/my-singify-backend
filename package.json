@@ -1,10 +1,10 @@
 {
-  "name": "noy's-backend",
+  "name": "singify-backend",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node index.ts"
+    "dev": "nodemon index.ts"
   },
   "keywords": [],
   "author": "",

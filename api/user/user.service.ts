@@ -8,6 +8,13 @@ const getUserByEmail = async (email: string): Promise<IUserModel | null> => {
     return error.message
   }
 }
+const getUserByName = async (name: string): Promise<IUserModel | null> => {
+  try {
+    return await UserModel.findOne({ name })
+  } catch (error: any) {
+    return error.message
+  }
+}
 
 const getUserById = async (userId: string): Promise<IUserModel | null> => {
   try {
@@ -43,4 +50,5 @@ export const userService = {
   getUserById,
   getUserByEmail,
   updateUserById,
+  getUserByName,
 }

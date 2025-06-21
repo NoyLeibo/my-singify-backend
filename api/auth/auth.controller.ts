@@ -65,11 +65,7 @@ const isEmailTaken = async (
   }
   try {
     const user = await authService.isEmailTaken(email)
-    if (user) {
-      return response.status(StatusCodes.OK).send({ exists: true })
-    } else {
-      return response.status(StatusCodes.OK).send({ exists: false })
-    }
+    return response.status(StatusCodes.OK).send({ exists: user ? true : false })
   } catch (error: any) {
     console.error('Error checking email existence:', error.message)
     return response

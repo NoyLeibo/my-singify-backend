@@ -4,6 +4,7 @@ import { jwtService } from '../../utils/jwt'
 import { userService } from '../user/user.service'
 import nodemailer from 'nodemailer'
 import { genderType } from '../../models/types'
+import { decrypt } from 'dotenv'
 
 const saltRounds: number = 10
 
@@ -53,8 +54,11 @@ const register = async (userData: registerScheme) => {
 const login = async (user: IUserModel, password: string) => {
   try {
     const userHashedPassword = user?.password
+    if (!userHashedPassword || !password) {
+      throw new Error('No password provided')
+    }
 
-    if (user && userHashedPassword) {
+    if (user) {
       const isPasswordCompared = await bcrypt.compare(
         password,
         userHashedPassword,
@@ -70,6 +74,16 @@ const login = async (user: IUserModel, password: string) => {
   } catch (error: any) {
     console.error('Error during login:', error)
     throw new Error('Invalid email or password')
+  }
+}
+
+const isEmailTaken = async (email: string) => {
+  try {
+    const user = await userService.getUserByEmail(email)
+    return user
+  } catch (error: any) {
+    console.error('Error checking email existence:', error.message)
+    throw new Error('Failed to check email existence')
   }
 }
 
@@ -119,4 +133,5 @@ export const authService = {
   login: login,
   changePassword,
   loginUserWithEmailOrName,
+  isEmailTaken,
 }

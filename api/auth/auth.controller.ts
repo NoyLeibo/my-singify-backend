@@ -53,6 +53,30 @@ const signup = async (request: Request, response: Response): Promise<any> => {
       .send(error.message)
   }
 }
+const isEmailTaken = async (
+  request: Request,
+  response: Response,
+): Promise<any> => {
+  const { email } = request.body
+  if (!email) {
+    return response
+      .status(StatusCodes.BAD_REQUEST)
+      .send('Email is required to check existence')
+  }
+  try {
+    const user = await authService.isEmailTaken(email)
+    if (user) {
+      return response.status(StatusCodes.OK).send({ exists: true })
+    } else {
+      return response.status(StatusCodes.OK).send({ exists: false })
+    }
+  } catch (error: any) {
+    console.error('Error checking email existence:', error.message)
+    return response
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send('Error checking email existence')
+  }
+}
 
 const login = async (request: Request, response: Response): Promise<any> => {
   const { emailOrName, password } = request.body
@@ -123,4 +147,5 @@ export const authController = {
   signup,
   login,
   changePassword,
+  isEmailTaken,
 }

@@ -5,6 +5,7 @@ const router = express.Router()
 
 router.post('/signup', authController.signup)
 router.post('/login', authController.login)
+router.post('/check-email', authController.isEmailTaken)
 router.post('/change-password', authController.changePassword)
 
 export const authRoutes = router

@@ -49,6 +49,7 @@ app.post('/', (req, res) => {
 app.use('/auth', authRoutes)
 app.use('/user', userRoutes)
 app.use('/task', taskRoutes)
+// app.use('/spotify', spotifyRoutes)
 
 const startServer = async () => {
   try {

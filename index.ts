@@ -2,13 +2,16 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import express from 'express'
 import { servers } from './src/servers'
-import session from 'express-session'
 import { testRoutes } from './api/tests/test.routes'
 import { dbService } from './services/db.service'
 import { userRoutes } from './api/user/user.routes'
 import { authRoutes } from './api/auth/auth.routes'
 import { taskRoutes } from './api/task/task.routes'
 import expressLogger from 'morgan'
+import { songsRoutes } from './api/songs/songs.routes'
+
+// TODO:
+// import session from 'express-session'
 // import cookieParser from 'cookie-parser'
 
 dotenv.config()
@@ -16,8 +19,9 @@ dotenv.config()
 const app = express()
 app.use(express.json())
 app.use(expressLogger('dev'))
+
 // app.use(cookieParser())
-app.use(express.static('public'))
+// app.use(express.static('public'))
 
 const corsOptions = {
   // Make sure origin contains the url your frontend is running on
@@ -49,7 +53,7 @@ app.post('/', (req, res) => {
 app.use('/auth', authRoutes)
 app.use('/user', userRoutes)
 app.use('/task', taskRoutes)
-// app.use('/spotify', spotifyRoutes)
+app.use('/song', songsRoutes)
 
 const startServer = async () => {
   try {
